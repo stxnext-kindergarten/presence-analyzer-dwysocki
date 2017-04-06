@@ -7,12 +7,12 @@ import csv
 from json import dumps
 from functools import wraps
 from datetime import datetime
+import logging
 
 from flask import Response
 
-from presence_analyzer.main import app
+from main import app  # pylint: disable=relative-import
 
-import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 

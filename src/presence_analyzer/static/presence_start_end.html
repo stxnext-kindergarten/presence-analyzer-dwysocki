@@ -7,7 +7,7 @@
     <meta name="description" content=""/>
     <meta name="author" content="STX Next sp. z o.o."/>
     <meta name="viewport" content="width=device-width; initial-scale=1.0">
-    
+
     <link href="/static/css/normalize.css" media="all" rel="stylesheet" type="text/css" />
     <style type="text/css">
         body {
@@ -23,7 +23,7 @@
             padding: 0 2em;
             border: 1px solid #AAA;
             background-color: #FFF;
-            
+
             border: 1px solid black;
             clear: both;
             padding: 0 1em;
@@ -32,20 +32,19 @@
             width: 750px;
             height: 750px;
         }
-
         #header ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         #header li {
             float: left;
             border: 1px solid #bbb;
             border-bottom-width: 0;
             margin: 0;
         }
-        
+
         #header a {
             text-decoration: none;
             display: block;
@@ -55,15 +54,15 @@
             width: 12em;
             text-align: center;
         }
-        
+
         #header a:hover {
             background: #ddf;
         }
-        
+
         #header #selected {
             border-color: black;
         }
-        
+
         #header #selected a {
             position: relative;
             top: 1px;
@@ -77,8 +76,7 @@
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
         google.load("visualization", "1", {packages:["corechart", "timeline"], 'language': 'pl'});
-    </script>
-    <script type="text/javascript">
+
         (function($) {
             $(document).ready(function(){
                 var loading = $('#loading');
@@ -96,15 +94,22 @@
                     if(selected_user) {
                         loading.show();
                         chart_div.hide();
-                        
+                        $.getJSON("/api/v1/presence_start_end/"+selected_user,
+                            function(resul){
+                                result = [
+                                ["Mon", new Date(Date.parse("1,1,1,"+resul["Monday"]["start"])),
+                                        new Date(Date.parse("1,1,1,"+resul["Monday"]["end"]))],
+                                ["Tue", new Date(Date.parse("1,1,1,"+resul["Tuesday"]["start"])),
+                                        new Date(Date.parse("1,1,1,"+resul["Tuesday"]["end"]))],
+                                ["Wed", new Date(Date.parse("1,1,1,"+resul["Wednesday"]["start"])),
+                                        new Date(Date.parse("1,1,1,"+resul["Wednesday"]["end"]))],
+                                ["Thu", new Date(Date.parse("1,1,1,"+resul["Thursday"]["start"])),
+                                        new Date(Date.parse("1,1,1,"+resul["Thursday"]["end"]))],
+                                ["Fri", new Date(Date.parse("1,1,1,"+resul["Friday"]["start"])),
+                                        new Date(Date.parse("1,1,1,"+resul["Friday"]["end"]))],
+                                ]
+
                         // some dummy data, this should go from API
-                        var result = [
-                            ["Mon", new Date(1, 1, 1, 7, 37, 38), new Date(1, 1, 1, 15, 07, 14)],
-                            ["Tue", new Date(1, 1, 1, 8, 16, 23), new Date(1, 1, 1, 14, 01, 47)],
-                            ["Wed", new Date(1, 1, 1, 7, 00, 06), new Date(1, 1, 1, 13, 24, 12)],
-                            ["Thu", new Date(1, 1, 1, 7, 26, 32), new Date(1, 1, 1, 12, 40, 45)],
-                            ["Fri", new Date(1, 1, 1, 6, 53, 22), new Date(1, 1, 1, 12, 52, 09)]
-                        ] 
 
                         var data = new google.visualization.DataTable();
                         data.addColumn('string', 'Weekday');
@@ -117,12 +122,11 @@
                         var formatter = new google.visualization.DateFormat({pattern: 'HH:mm:ss'});
                         formatter.format(data, 1);
                         formatter.format(data, 2);
-
                         chart_div.show();
                         loading.hide();
                         var chart = new google.visualization.Timeline(chart_div[0]);
                         chart.draw(data, options);
-
+                    });
                     }
                 });
             });
@@ -134,7 +138,7 @@
     <div id="main">
         <div id="header">
             <h1>Presence analyzer</h1>
-            
+
             <ul>
                 <li><a href="/static/presence_weekday.html">Presence by weekday</a></li>
                 <li><a href="/static/mean_time_weekday.html">Presence mean time</a></li>

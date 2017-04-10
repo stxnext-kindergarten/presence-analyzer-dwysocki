@@ -3,9 +3,10 @@
 Helper functions used in views.
 """
 
+import calendar
 import csv
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from json import dumps
 
@@ -102,3 +103,43 @@ def mean(items):
     Calculates arithmetic mean. Returns zero for empty lists.
     """
     return float(sum(items)) / len(items) if len(items) > 0 else 0
+
+
+def average_seconds(data, board):
+    """
+    Calculate average time in seconds and return it as string.
+    """
+    return str(
+        timedelta(seconds=mean(data[board]))
+    ).split(".")[0]
+
+
+def star_end_time(data, user_id):
+    """
+    Calculate average time when user start the work and when user end the work.
+    """
+    days_abbr = calendar.day_abbr
+    result = {
+        day: {'start': [], 'end': []}
+        for day in days_abbr
+    }
+
+    for item in data[user_id]:
+        day = days_abbr[item.weekday()]
+
+        result[day]['start'].append(
+            seconds_since_midnight(
+                data[user_id][item]['start']
+            )
+        )
+        result[day]['end'].append(
+            seconds_since_midnight(
+                data[user_id][item]['end']
+            )
+        )
+    print str(timedelta(seconds=mean(result[day]['start'])))
+    for day in result:
+        result[day]['start'] = average_seconds(result[day], 'start')
+        result[day]['end'] = average_seconds(result[day], 'end')
+
+    return result

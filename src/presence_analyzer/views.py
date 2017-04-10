@@ -6,11 +6,17 @@ Defines views.
 import calendar
 import logging
 
-from flask import redirect, abort
+from flask import abort
+from flask import redirect
 
 from main import app  # pylint: disable=relative-import
-from utils import jsonify, get_data, mean, group_by_weekday
-
+from utils import (  # pylint: disable=relative-import
+    star_end_time,
+    get_data,
+    group_by_weekday,
+    jsonify,
+    mean
+)
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -52,7 +58,6 @@ def mean_time_weekday_view(user_id):
         (calendar.day_abbr[weekday], mean(intervals))
         for weekday, intervals in enumerate(weekdays)
     ]
-
     return result
 
 
@@ -75,3 +80,16 @@ def presence_weekday_view(user_id):
 
     result.insert(0, ('Weekday', 'Presence (s)'))
     return result
+
+
+@app.route('/api/v1/presence_start_end/<int:user_id>', methods=['GET'])
+@jsonify
+def presence_start_end(user_id):
+    """
+    Return average time when user start the work and when user end the work.
+    """
+    data = get_data()
+    if user_id not in data:
+        log.debug('User %s not found!', user_id)
+        abort(404)
+    return star_end_time(data, user_id)

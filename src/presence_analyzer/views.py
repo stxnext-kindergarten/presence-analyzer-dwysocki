@@ -5,11 +5,15 @@ Defines views.
 
 import calendar
 import logging
+from datetime import timedelta
 
 from flask import redirect, abort
 
 from main import app  # pylint: disable=relative-import
-from utils import jsonify, get_data, mean, group_by_weekday
+from utils import (  # pylint: disable=relative-import
+    jsonify, get_data,
+    mean, group_by_weekday,
+    seconds_since_midnight)
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -52,7 +56,6 @@ def mean_time_weekday_view(user_id):
         (calendar.day_abbr[weekday], mean(intervals))
         for weekday, intervals in enumerate(weekdays)
     ]
-
     return result
 
 
@@ -75,3 +78,30 @@ def presence_weekday_view(user_id):
 
     result.insert(0, ('Weekday', 'Presence (s)'))
     return result
+
+
+@app.route('/api/v1/presence_start_end/<int:user_id>', methods=['GET'])
+@jsonify
+def presence_start_end(user_id):
+    """
+    Calculate average time when user start the work and when user end the work.
+    """
+    data = get_data()
+    if user_id not in data:
+        log.debug('User %s not found!', user_id)
+        abort(404)
+
+    resul = {}
+    for item in data[user_id]:
+        resul[calendar.day_name[item.weekday()]] = {}
+
+    for item in data[user_id]:
+        resul[calendar.day_name[item.weekday()]]['start'] = str(
+            timedelta(
+                seconds=seconds_since_midnight(
+                    data[user_id][item]['start'])))
+        resul[calendar.day_name[item.weekday()]]['end'] = str(
+            timedelta(
+                seconds=seconds_since_midnight(
+                    data[user_id][item]['end'])))
+    return resul

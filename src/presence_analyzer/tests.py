@@ -107,6 +107,42 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             }
         )
 
+    def test_presence_start_end(self):
+        """
+        Test calculating average time when user start and end work.
+        """
+        resp = self.client.get('/api/v1/presence_start_end/0')
+
+        self.assertEqual(resp.status_code, 404)
+
+        bad_resp = self.client.get('/api/v1/presence_start_end/11')
+        data = dict(json.loads(bad_resp.data))
+
+        self.assertEqual(bad_resp.status_code, 200)
+        self.assertDictEqual(
+            data, {
+                u'Tuesday': {
+                    u'start': u'9:19:50',
+                    u'end': u'13:55:54',
+                },
+                u'Friday': {
+                    u'start': u'13:16:56',
+                    u'end': u'15:04:02',
+                },
+                u'Monday': {
+                    u'start': u'9:12:14',
+                    u'end': u'15:54:17',
+                },
+                u'Wednesday': {
+                    u'start': u'9:13:26',
+                    u'end': u'16:15:27',
+                },
+                u'Thursday': {
+                    u'start': u'9:28:08',
+                    u'end': u'15:51:27',
+                },
+            })
+
 
 class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
     """
